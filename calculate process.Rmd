@@ -1,0 +1,26 @@
+---
+title: "My awesome website"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(htmlwidgets)
+library(flexdashboard)
+library(p8105.datasets)
+library(rvest)
+library(readxl)
+```
+
+
+```{r}
+hmcd =read.csv("./homicide-data.csv") %>% 
+  janitor::clean_names() 
+head(hmcd)
+```
+The data set has `r nrow(hmcd)` * ` r ncol(hmcd)` dimensions. Where uid describes the incident number, reported_date indicates the date and time, victim_last or victim first indicates the victim's name, and other data includes: race, age, gender, city, state, longitude, and latitude. And whether the incident was finally detected.
+
+
