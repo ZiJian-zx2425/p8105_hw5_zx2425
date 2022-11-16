@@ -168,6 +168,7 @@ mean_16 = expand_grid(mean_16 = 1:6, iteration = 1:5000) %>%
 mean_16result = mean_16 %>%   
 unnest(t_result)
 mean_16result
+mean_16result= na.omit(mean_16result) 
 ```
 ## step4
 Make a plot showing the __proportion of times the null was rejected__ (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
@@ -190,8 +191,32 @@ plot1
 With the total number of the case increase, the reject proportion increase at the same time. Furthermore, the trend of the value change is tend to be 1.
 
 ## step5
-Make a plot showing the average estimate of μ^ on the y axis and the true value of μ on the x axis. Make a second plot (or overlay on the first) the average estimate of μ^ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ^ across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
+Make a plot showing the average estimate of μ^ on the y axis and the true value of μ on the x axis. 
 ```{r}
+mean_16result %>%
+  group_by(mean_16) %>% 
+  summarize(avg_eti = mean(estimate)) %>% 
+  ggplot(aes(x = mean_16,y = avg_eti)) +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
+  geom_point() + 
+  geom_path()
+```
+
+## step 6
+Make a second plot (or overlay on the first) the average estimate of μ^ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ^ across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
+```{r}
+rej_eti_u = mean_16result %>% 
+  filter(p.value < 0.05) %>% 
+  group_by(mean_16) %>% 
+  summarize(
+    avg_eti = mean(estimate))
+plot2=rej_eti_u %>% 
+  ggplot(aes(x = mean_16,y = avg_eti)) +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
+  geom_point() + 
+  geom_path()
+plot2
+
 
 ```
 

@@ -234,7 +234,7 @@ t_test(0)
     ## # A tibble: 1 × 2
     ##   estimate p.value
     ##      <dbl>   <dbl>
-    ## 1   -0.900   0.339
+    ## 1     1.08   0.272
 
 ``` r
 sim_results_df = 
@@ -263,17 +263,21 @@ mean_16result
     ## # A tibble: 30,000 × 4
     ##    mean_16 iteration estimate p.value
     ##      <int>     <int>    <dbl>   <dbl>
-    ##  1       1         1   0.979  0.345  
-    ##  2       1         2   0.0525 0.948  
-    ##  3       1         3   0.265  0.736  
-    ##  4       1         4   1.14   0.227  
-    ##  5       1         5   0.434  0.664  
-    ##  6       1         6   0.354  0.743  
-    ##  7       1         7   2.57   0.00360
-    ##  8       1         8   2.41   0.0128 
-    ##  9       1         9   0.306  0.769  
-    ## 10       1        10   0.949  0.310  
+    ##  1       1         1   3.14   0.00111
+    ##  2       1         2  -0.666  0.458  
+    ##  3       1         3  -0.667  0.549  
+    ##  4       1         4   0.682  0.501  
+    ##  5       1         5   0.323  0.793  
+    ##  6       1         6   1.77   0.0395 
+    ##  7       1         7   0.0373 0.972  
+    ##  8       1         8   0.288  0.751  
+    ##  9       1         9   1.26   0.139  
+    ## 10       1        10   1.61   0.0820 
     ## # … with 29,990 more rows
+
+``` r
+mean_16result= na.omit(mean_16result) 
+```
 
 ## step4
 
@@ -307,8 +311,40 @@ tend to be 1.
 ## step5
 
 Make a plot showing the average estimate of μ^ on the y axis and the
-true value of μ on the x axis. Make a second plot (or overlay on the
-first) the average estimate of μ^ only in samples for which the null was
-rejected on the y axis and the true value of μ on the x axis. Is the
-sample average of μ^ across tests for which the null is rejected
-approximately equal to the true value of μ? Why or why not?
+true value of μ on the x axis.
+
+``` r
+mean_16result %>%
+  group_by(mean_16) %>% 
+  summarize(avg_eti = mean(estimate)) %>% 
+  ggplot(aes(x = mean_16,y = avg_eti)) +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
+  geom_point() + 
+  geom_path()
+```
+
+![](calculate-process_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+## step 6
+
+Make a second plot (or overlay on the first) the average estimate of μ^
+only in samples for which the null was rejected on the y axis and the
+true value of μ on the x axis. Is the sample average of μ^ across tests
+for which the null is rejected approximately equal to the true value of
+μ? Why or why not?
+
+``` r
+rej_eti_u = mean_16result %>% 
+  filter(p.value < 0.05) %>% 
+  group_by(mean_16) %>% 
+  summarize(
+    avg_eti = mean(estimate))
+plot2=rej_eti_u %>% 
+  ggplot(aes(x = mean_16,y = avg_eti)) +
+  scale_x_continuous(limits = c(1,6), breaks = seq(1,6,1)) + 
+  geom_point() + 
+  geom_path()
+plot2
+```
+
+![](calculate-process_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
