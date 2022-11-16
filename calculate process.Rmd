@@ -1,9 +1,6 @@
 ---
-title: "My awesome website"
-output: 
-  html_document:
-    toc: true
-    toc_float: true
+title: "p8105_hw5_zx2425"
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -15,12 +12,41 @@ library(rvest)
 library(readxl)
 ```
 
+# Problem2
+## step1
+Describe the raw data. Create a city_state variable (e.g. “Baltimore, MD”) 
 
 ```{r}
 hmcd =read.csv("./homicide-data.csv") %>% 
   janitor::clean_names() 
 head(hmcd)
 ```
-The data set has `r nrow(hmcd)` * ` r ncol(hmcd)` dimensions. Where uid describes the incident number, reported_date indicates the date and time, victim_last or victim first indicates the victim's name, and other data includes: race, age, gender, city, state, longitude, and latitude. And whether the incident was finally detected.
+The data set has `r nrow(hmcd)` * ` r ncol(hmcd)` dimensions. Where uid describes the incident number, reported_date indicates the date and time, victim_last and victim first indicates the victim's name, and other data includes: race, age, gender, city, state, longitude, and latitude. And whether the incident was finally detected.
+
+## step2
+then summarize within cities to obtain the total number of homicides and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
+
+```{r}
+hmcd=hmcd %>% 
+  mutate(
+    city_state=str_c(city,"_",state)
+  )
+
+count_vic=hmcd %>% 
+  group_by(city_state) %>% 
+  summarize(
+    vic_number=n()
+  )
+count_dect=hmcd %>% 
+  filter(disposition %in% c("Closed without arrest", "Open/No arrest")) %>% 
+  group_by(city_state) %>% 
+  summarize(
+    undec_number=n()
+  )
+
+count = full_join(count_vic,count_dect,by="city_state")
+count[is.na(count)] <- 0
+```
+
 
 
