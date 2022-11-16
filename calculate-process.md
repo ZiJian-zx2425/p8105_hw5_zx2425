@@ -60,5 +60,33 @@ count_dect=hmcd %>%
   )
 
 count = full_join(count_vic,count_dect,by="city_state")
-count[is.na(count)] <- 0
+count[is.na(count)] = 0
 ```
+
+## step3
+
+For the city of **Baltimore, MD**, use the **prop.test** function to
+estimate the proportion of homicides that are unsolved; save the output
+of prop.test as an R object, apply the **broom::tidy** to this object
+and pull the *estimated* *proportion* and *confidence intervals* from
+the resulting tidy dataframe.
+
+``` r
+city_B= hmcd %>% 
+  filter(city_state == 'Baltimore_MD')
+city_B_count= city_B %>% 
+   summarise(
+      unsolved = sum(disposition %in%c("Closed without arrest", "Open/No arrest")  ),
+      ###sum can calculate the True or false with result of number
+      n = n()
+    )
+city_B_test = 
+  prop.test(x = city_B_count %>% pull(unsolved),n = city_B_count %>% pull(n))
+city_B_test %>% 
+  broom::tidy() %>% 
+  knitr::kable()  
+```
+
+|  estimate | statistic | p.value | parameter |  conf.low | conf.high | method                                               | alternative |
+|----------:|----------:|--------:|----------:|----------:|----------:|:-----------------------------------------------------|:------------|
+| 0.6455607 |   239.011 |       0 |         1 | 0.6275625 | 0.6631599 | 1-sample proportions test with continuity correction | two.sided   |
