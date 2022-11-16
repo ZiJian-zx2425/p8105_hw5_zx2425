@@ -196,4 +196,119 @@ city_iterate %>%
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high))
 ```
 
-![](calculate-process_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](calculate-process_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> \#
+problem3 When designing an experiment or analysis, a common question is
+whether it is likely that a true effect will be detected – put
+differently, whether a false null hypothesis will be rejected. The
+probability that a false null hypothesis is rejected is referred to as
+power, and it depends on several factors, including: the sample size;
+the effect size; and the error variance. In this problem, you will
+conduct a simulation to explore power in a one-sample t-test.
+
+# step1
+
+Let’s define a t.test function with known parameter
+
+``` r
+t_test  = function(mu, n=30, sigma = 5) {
+  
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma),
+  )
+  
+   t_result = t.test(sim_data) %>% 
+    broom::tidy() %>% 
+    select(estimate,p.value)
+  t_result
+}
+```
+
+## Step=2
+
+Let’s simulate when u=0
+
+``` r
+t_test(0)
+```
+
+    ## # A tibble: 1 × 2
+    ##   estimate p.value
+    ##      <dbl>   <dbl>
+    ## 1   -0.900   0.339
+
+``` r
+sim_results_df = 
+  expand_grid(
+    mean_1 = 0,
+    iter = 1:5000
+  ) %>% 
+  mutate(
+    t_result = map(mean_1,t_test)
+  ) %>% 
+  unnest(t_result)
+```
+
+## step=3
+
+Let’s simulate when u=1:6
+
+``` r
+mean_16 = expand_grid(mean_16 = 1:6, iteration = 1:5000) %>% 
+  mutate(t_result = map(mean_16,t_test))
+mean_16result = mean_16 %>%   
+unnest(t_result)
+mean_16result
+```
+
+    ## # A tibble: 30,000 × 4
+    ##    mean_16 iteration estimate p.value
+    ##      <int>     <int>    <dbl>   <dbl>
+    ##  1       1         1   0.979  0.345  
+    ##  2       1         2   0.0525 0.948  
+    ##  3       1         3   0.265  0.736  
+    ##  4       1         4   1.14   0.227  
+    ##  5       1         5   0.434  0.664  
+    ##  6       1         6   0.354  0.743  
+    ##  7       1         7   2.57   0.00360
+    ##  8       1         8   2.41   0.0128 
+    ##  9       1         9   0.306  0.769  
+    ## 10       1        10   0.949  0.310  
+    ## # … with 29,990 more rows
+
+## step4
+
+Make a plot showing the **proportion of times the null was rejected**
+(the power of the test) on the y axis and the true value of μ on the x
+axis. Describe the association between effect size and power. Let’s us
+observe when u is equal to different value, the proportion of times that
+we reject H0
+
+``` r
+plot1_df=mean_16result %>% 
+  group_by(mean_16) %>% 
+  summarize(
+    reject_case=sum(p.value<0.05),
+    reject_proportion=reject_case/5000
+  )
+
+plot1=plot1_df %>% 
+  ggplot(aes(x=mean_16,y=reject_proportion))+
+    scale_x_continuous(limits=c(1,6),breaks=seq(1,6,11))+
+      geom_point()+
+      geom_path()
+plot1
+```
+
+![](calculate-process_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+With the total number of the case increase, the reject proportion
+increase at the same time. Furthermore, the trend of the value change is
+tend to be 1.
+
+## step5
+
+Make a plot showing the average estimate of μ^ on the y axis and the
+true value of μ on the x axis. Make a second plot (or overlay on the
+first) the average estimate of μ^ only in samples for which the null was
+rejected on the y axis and the true value of μ on the x axis. Is the
+sample average of μ^ across tests for which the null is rejected
+approximately equal to the true value of μ? Why or why not?
