@@ -67,4 +67,22 @@ city_B_test %>%
   knitr::kable()  
   
 ```
+## step4
+Now run __prop.test__ for _each of the cities_ in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of __purrr::map, purrr::map2__, list columns and __unnest__ as necessary to create a tidy dataframe with _estimated proportions and CIs_ for each city.
+
+```{r}
+pro_test_df= function(each_city){
+  city_info=
+    each_city %>% 
+    summarize(
+      unsolved = sum(disposition %in%c("Closed without arrest", "Open/No arrest")  ),
+      n=n()
+    )
+  city_test= prop.test(
+    x=city_info %>% pull(unsolved),
+    n=city_info %>% pull(n)
+  )
+  city_test
+}
+```
 
